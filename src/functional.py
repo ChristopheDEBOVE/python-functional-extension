@@ -23,7 +23,7 @@ class Infix(object):
 
 @Infix
 def map(result, fn: Callable[[T], T]) -> Result[T]:
-    if result._error is not None:
+    if result.is_failure:
         return result
 
     return Result.success(fn(result.value))
@@ -45,7 +45,7 @@ def success_bind(result, fn: Callable[[T], T]) -> Result[T]:
 
 @Infix
 def bind(result, fn: Callable[[T], T]) -> Result[T]:
-    if result._error is not None:
+    if result.is_failure:
         return result
 
     return fn(result.value)
@@ -53,8 +53,8 @@ def bind(result, fn: Callable[[T], T]) -> Result[T]:
 
 @Infix
 def if_failure(result, fn: Callable[[T], T]) -> Result[T]:
-    if result._error is not None:
-        return fn(result._error)
+    if result.is_failure:
+        return fn(result.get_error_unsafe)
 
     return result
 
@@ -74,22 +74,20 @@ def tap(result, fn: Callable[[T], T]) -> Result[T]:
 
 @Infix
 def error_unsafe(result) -> Result[T]:
-    if result._error is None:
-        raise Exception("Trying to access nonexistent error")
-    return result._error
+    return result.get_error_unsafe
 
 
 @Infix
 def match(result, ma: tuple[Callable[[T], T], Callable[[str], T]]) -> T:
-    if result._error is not None:
-        return ma[1](result._error)
+    if result.is_failure:
+        return ma[1](result.get_error_unsafe)
 
     return ma[0](result.value)
 
 
 @Infix
 def ensure(result, ma: tuple[Callable[[T], T], Exception]) -> T:
-    if result._error is not None:
+    if result.is_failure:
         return result
 
     if not ma[0](result.value):
@@ -102,6 +100,20 @@ def ensure(result, ma: tuple[Callable[[T], T], Exception]) -> T:
 class Result(Generic[T]):
     _error: str | None = None
     value: T | None = None
+
+    @property
+    def is_success(self) -> bool:
+        return self._error is None
+
+    @property
+    def is_failure(self) -> bool:
+        return self._error is not None
+
+    @property
+    def get_error_unsafe(self) -> str:
+        if self.is_success:
+            Exception("Trying to access nonexistent error")
+        return self._error
 
     @classmethod
     def success(cls, value: T) -> "Result[T]":
