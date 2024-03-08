@@ -7,7 +7,7 @@ def test_safe_success():
         return 1
 
     result = lili()
-    assert result.value == 1
+    assert result.get_value_unsafe == 1
 
 
 def test_safe_exception():

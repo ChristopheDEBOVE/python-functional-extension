@@ -124,19 +124,19 @@ def test_tap():
         steps += str(result) + "\n"
 
     with_id(2) \
-    | tap | log_steps \
-    | bind | get_account \
-    | tap | log_steps \
-    | bind | delete_account \
-    | tap | log_steps \
-    | bind | get_account \
-    | tap | log_steps \
-    | success_unsafe
+     | tap | log_steps \
+     | bind | get_account \
+     | tap | log_steps \
+     | bind | delete_account \
+     | tap | log_steps \
+     | bind | get_account \
+     | tap | log_steps \
+     | success_unsafe
 
-    assert steps == """Result(_error=None, value=2)
-Result(_error=None, value=Account(id=2))
-Result(_error=None, value=1)
-Result(_error=None, value=Account(id=1))
+    assert steps == """Result(_error=None, _value=2)
+Result(_error=None, _value=Account(id=2))
+Result(_error=None, _value=1)
+Result(_error=None, _value=Account(id=1))
 """
 
 
@@ -146,16 +146,16 @@ def test_if_failure():
 
     with pytest.raises(Exception) as e_info:
         with_id(0) \
-        | bind | get_account \
-        | if_failure | should_call
+         | bind | get_account \
+         | if_failure | should_call
 
     assert "Account Not found" in str(e_info)
 
     result = with_id(1) \
-             | bind | get_account \
-             | if_failure | should_call
+        | bind | get_account \
+        | if_failure | should_call
 
-    assert result.value.id == 1
+    assert result._value.id == 1
 
 
 def test_ensure():
@@ -167,8 +167,8 @@ def test_ensure():
     assert result._error == "Should be superior to 2"
 
     result = with_id(3) \
-             | bind | get_account \
-             | ensure | (lambda account: account.id > 2, Exception("Should be superior to 2")) \
-             | map | account_to_user
+        | bind | get_account \
+        | ensure | (lambda account: account.id > 2, Exception("Should be superior to 2")) \
+        | map | account_to_user
 
-    assert isinstance(result.value, User)
+    assert isinstance(result._value, User)

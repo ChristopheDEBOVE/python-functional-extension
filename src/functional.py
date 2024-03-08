@@ -26,7 +26,7 @@ def map(result, fn: Callable[[T], T]) -> Result[T]:
     if result.is_failure:
         return result
 
-    return Result.success(fn(result.value))
+    return Result.success(fn(result.get_value_unsafe))
 
 
 def as_success(result) -> Result[T]:
@@ -48,7 +48,7 @@ def bind(result, fn: Callable[[T], T]) -> Result[T]:
     if result.is_failure:
         return result
 
-    return fn(result.value)
+    return fn(result.get_value_unsafe)
 
 
 @Infix
@@ -61,9 +61,7 @@ def if_failure(result, fn: Callable[[T], T]) -> Result[T]:
 
 @Infix
 def success_unsafe(result) -> Result[T]:
-    if result.value is None:
-        raise Exception("Trying to access nonexistent value")
-    return result.value
+    return result.get_value_unsafe
 
 
 @Infix
@@ -82,15 +80,15 @@ def match(result, ma: tuple[Callable[[T], T], Callable[[str], T]]) -> T:
     if result.is_failure:
         return ma[1](result.get_error_unsafe)
 
-    return ma[0](result.value)
+    return ma[0](result.get_value_unsafe)
 
 
 @Infix
 def ensure(result, ma: tuple[Callable[[T], T], Exception]) -> T:
     if result.is_failure:
         return result
-
-    if not ma[0](result.value):
+    # check that part; seems buggy
+    if not ma[0](result.get_value_unsafe):
         return Result.error(ma[1])
 
     return result
@@ -99,7 +97,7 @@ def ensure(result, ma: tuple[Callable[[T], T], Exception]) -> T:
 @dataclasses.dataclass
 class Result(Generic[T]):
     _error: str | None = None
-    value: T | None = None
+    _value: T | None = None
 
     @property
     def is_success(self) -> bool:
@@ -115,9 +113,15 @@ class Result(Generic[T]):
             Exception("Trying to access nonexistent error")
         return self._error
 
+    @property
+    def get_value_unsafe(self) -> str:
+        if self.is_failure:
+            raise Exception("Trying to access nonexistent value")
+        return self._value
+
     @classmethod
     def success(cls, value: T) -> "Result[T]":
-        return cls(value=value)
+        return cls(_value=value)
 
     @classmethod
     def error(cls, error: Exception):

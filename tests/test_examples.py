@@ -1,5 +1,5 @@
 from src.functional import ensure, bind
-from tests.test_result import with_id,map, account_to_user, get_account
+from tests.test_result import with_id, map, account_to_user, get_account
 
 
 def test_with_id():
@@ -11,7 +11,7 @@ def test_with_id():
     assert result._error == "id must be positive"
 
     result = with_id("&") \
-        | bind | get_account \
-        | map | account_to_user
+             | bind | get_account \
+             | map | account_to_user
 
     assert result._error == "id must be an integer"
