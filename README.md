@@ -16,7 +16,7 @@ This library helps write code in more functional way.
     assert str(second_name.get_value_unsafe) == "John"
 ```
 
-### Get rid of your Error raised and regain control of your flow
+### Get rid of the Errors raised and regain control of your flow
 
 ```python
     @safe
