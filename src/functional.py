@@ -48,6 +48,10 @@ class Result(Generic[T]):
         fn(self)
         return self
 
+    @classmethod
+    def combine(cls, name, email):
+        pass
+
 
 class Infix(object):
     def __init__(self, func):

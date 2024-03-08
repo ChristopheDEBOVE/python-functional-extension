@@ -3,6 +3,31 @@
 This library helps write code in more functional way.
 ## Core Concepts
 
+### Get rid of primitive obsession (pydantic compatible)
+
+```python
+    first_name = CustomerName.create("")
+    second_name = CustomerName.create("John")
+
+    assert first_name.is_failure
+    assert first_name.get_error_unsafe == "Invalid name"
+
+    assert second_name.is_success
+    assert str(second_name.get_value_unsafe) == "John"
+```
+
+### Get rid of your Error raised and regain control of your flow
+
+```python
+    @safe
+    def raise_error():
+        raise Exception("fatal error")
+
+    result = raise_error()
+    assert result.is_failure
+    assert result.get_error_unsafe == "fatal error"
+```
+
 ## API Examples
 
 ### Result

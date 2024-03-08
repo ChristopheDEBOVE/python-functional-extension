@@ -12,8 +12,8 @@ def test_safe_success():
 
 def test_safe_exception():
     @safe
-    def lili():
-        raise Exception("qsd")
+    def i_raise_error():
+        raise Exception("fatal error")
 
-    result = lili()
-    assert result.get_error_unsafe == "qsd"
+    result = i_raise_error()
+    assert result.get_error_unsafe == "fatal error"
