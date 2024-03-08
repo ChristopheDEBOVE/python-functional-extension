@@ -2,9 +2,41 @@ import dataclasses
 from functools import partial
 from typing import TypeVar, Generic, Callable
 
-from pluggy import Result
-
 T = TypeVar("T")
+
+
+@dataclasses.dataclass
+class Result(Generic[T]):
+    _error: str | None = None
+    _value: T | None = None
+
+    @property
+    def is_success(self) -> bool:
+        return self._error is None
+
+    @property
+    def is_failure(self) -> bool:
+        return self._error is not None
+
+    @property
+    def get_error_unsafe(self) -> str:
+        if self.is_success:
+            Exception("Trying to access nonexistent error")
+        return self._error
+
+    @property
+    def get_value_unsafe(self) -> str:
+        if self.is_failure:
+            raise Exception("Trying to access nonexistent value")
+        return self._value
+
+    @classmethod
+    def success(cls, value: T) -> "Result[T]":
+        return cls(_value=value)
+
+    @classmethod
+    def error(cls, error: Exception):
+        return cls(_error=str(error))
 
 
 class Infix(object):
@@ -92,40 +124,6 @@ def ensure(result, ma: tuple[Callable[[T], T], Exception]) -> T:
         return Result.error(ma[1])
 
     return result
-
-
-@dataclasses.dataclass
-class Result(Generic[T]):
-    _error: str | None = None
-    _value: T | None = None
-
-    @property
-    def is_success(self) -> bool:
-        return self._error is None
-
-    @property
-    def is_failure(self) -> bool:
-        return self._error is not None
-
-    @property
-    def get_error_unsafe(self) -> str:
-        if self.is_success:
-            Exception("Trying to access nonexistent error")
-        return self._error
-
-    @property
-    def get_value_unsafe(self) -> str:
-        if self.is_failure:
-            raise Exception("Trying to access nonexistent value")
-        return self._value
-
-    @classmethod
-    def success(cls, value: T) -> "Result[T]":
-        return cls(_value=value)
-
-    @classmethod
-    def error(cls, error: Exception):
-        return cls(_error=str(error))
 
 
 def safe(func):
