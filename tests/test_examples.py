@@ -1,17 +1,21 @@
-from src.functional import ensure, bind
+import dataclasses
+
+from src.functional import ensure, bind, Result
 from tests.test_result import with_id, map, account_to_user, get_account
 
 
-def test_with_id():
-    result = with_id(-1) \
-             | ensure | (lambda x: x > -1, Exception("id must be positive")) \
-             | bind | get_account \
-             | map | account_to_user
+@dataclasses.dataclass
+class FruitInventory:
+    name: str
+    count: int
 
-    assert result._error == "id must be positive"
 
-    result = with_id("&") \
-             | bind | get_account \
-             | map | account_to_user
+def test_map():
+    def create_message(inventory: FruitInventory):
+        return f"There are {inventory.count} {inventory.name}(s)"
 
-    assert result._error == "id must be an integer"
+    apple_inventory = Result.success(FruitInventory("apple", 4))
+    banana_inventory = Result.error(Exception("Could not find any bananas"))
+
+    assert apple_inventory.map(create_message) == Result.success("There are 4 apple(s)")
+    assert banana_inventory.map(create_message) == Result.error(Exception("Could not find any bananas"))
