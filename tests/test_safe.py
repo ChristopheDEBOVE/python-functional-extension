@@ -3,7 +3,7 @@ from src.functional import safe
 
 def test_safe_success():
     @safe
-    def lili() -> int:
+    def lili():
         return 1
 
     result = lili()
@@ -16,4 +16,4 @@ def test_safe_exception():
         raise Exception("qsd")
 
     result = lili()
-    assert result._error == "qsd"
+    assert result.get_error_unsafe == "qsd"
