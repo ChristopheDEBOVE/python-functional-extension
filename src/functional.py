@@ -38,6 +38,16 @@ class Result(Generic[T]):
     def error(cls, error: Exception):
         return cls(_error=str(error))
 
+    def map(self, fn: Callable[[T], T]) -> "Result[T]":
+        if self.is_failure:
+            return self
+
+        return Result.success(fn(self.get_value_unsafe))
+
+    def tap(self, fn: Callable[[T], T]) -> "Result[T]":
+        fn(self)
+        return self
+
 
 class Infix(object):
     def __init__(self, func):
@@ -55,19 +65,11 @@ class Infix(object):
 
 @Infix
 def map(result, fn: Callable[[T], T]) -> Result[T]:
-    if result.is_failure:
-        return result
-
-    return Result.success(fn(result.get_value_unsafe))
+    return result.map(fn)
 
 
 def as_success(result) -> Result[T]:
     return Result.success(result)
-
-
-@Infix
-def map_result(result, fn: Callable[[T], T]) -> Result[T]:
-    return Result.success(fn(result))
 
 
 @Infix
@@ -98,8 +100,7 @@ def success_unsafe(result) -> Result[T]:
 
 @Infix
 def tap(result, fn: Callable[[T], T]) -> Result[T]:
-    fn(result)
-    return result
+    return result.tap(fn)
 
 
 @Infix

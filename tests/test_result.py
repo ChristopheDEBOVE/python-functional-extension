@@ -164,11 +164,11 @@ def test_ensure():
              | ensure | (lambda account: account.id > 2, Exception("Should be superior to 2")) \
              | map | account_to_user
 
-    assert result._error == "Should be superior to 2"
+    assert result.get_error_unsafe == "Should be superior to 2"
 
     result = with_id(3) \
         | bind | get_account \
         | ensure | (lambda account: account.id > 2, Exception("Should be superior to 2")) \
         | map | account_to_user
 
-    assert isinstance(result._value, User)
+    assert isinstance(result.get_value_unsafe, User)
