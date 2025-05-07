@@ -31,13 +31,13 @@ This library helps write code in more functional way.
 ### Adopt a new development style - Railway programming flavor
 
 ```python
-    response = get_account(3) \
-               | map | account_to_user \
-               | map | user_to_account \
-               | bind | delete_account \
-               | map | increment \
-               | bind | get_account \
-               | success_unsafe
+    response = (get_account(3) 
+               | map | account_to_user 
+               | map | user_to_account 
+               | bind | delete_account 
+               | map | increment 
+               | bind | get_account 
+               | success_unsafe)
 ```
 
     
